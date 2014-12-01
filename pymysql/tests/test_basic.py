@@ -138,6 +138,19 @@ class TestConversion(base.PyMySQLTestCase):
         finally:
             c.execute("drop table if exists test_datetime")
 
+    def test_inherited_type(self):
+        """ test inherited type escape """
+        conn = self.connections[0]
+        c = conn.cursor()
+        class TestDT(datetime.datetime): pass
+        dt = TestDT(2013,11,12,9,9,9)
+        try:
+            c.execute("create table test_datetime (id int, ts datetime)")
+            c.execute("insert into test_datetime values (1,%s)", dt)
+            c.execute("select ts from test_datetime")
+            self.assertEqual((dt,),c.fetchone())
+        finally:
+            c.execute("drop table if exists test_datetime")
 
 class TestCursor(base.PyMySQLTestCase):
     # this test case does not work quite right yet, however,

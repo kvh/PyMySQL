@@ -21,7 +21,13 @@ def escape_item(val, charset):
         return escape_sequence(val, charset)
     if type(val) is dict:
         return escape_dict(val, charset)
-    encoder = encoders[type(val)]
+    try:
+        encoder = encoders[type(val)]
+    except KeyError:
+        for type_, enc in encoders.items():
+            if isinstance(val, type_):
+                encoder = enc
+                break
     val = encoder(val)
     return val
 
@@ -90,7 +96,10 @@ def escape_datetime(obj):
     return escape_str(obj.isoformat(' '))
 
 def escape_date(obj):
-    return escape_str(obj.isoformat())
+    try:
+        return escape_str(obj.isoformat(' '))
+    except TypeError:
+        return escape_str(obj.isoformat())
 
 def escape_struct_time(obj):
     return escape_datetime(datetime.datetime(*obj[:6]))
